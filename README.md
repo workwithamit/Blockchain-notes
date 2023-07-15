@@ -484,9 +484,277 @@ useEffect(()=>{
 
 # small question backend mai entrance fee pahle se declared h ya hum set krte h?
 
+# one more why do we need to reset the reset account in metamask after a while?
+
 ---> the entranceFee will be wei, convert it to ether using "ethers"
 
 ```
 ether.utils.formatUnits(entranceFee,"ether")
 ```
-#
+
+# Calling functions in NextJs
+
+---> so finally we have entranceFee, and a function to enter the lottery
+
+for using entranceFee we need keep it in raw form
+
+do not convert it into .toString()
+
+you can change it while manupulating html jsx whatever
+
+```
+const {runContractFunction: enterRaffle} = useWeb3Contract({
+    abi:abi,
+    contractAddresses:
+    //specify the networkId
+    contractAddresses[???][0],
+    functionName: "enterRaffle",
+    params:{},
+    msgValue:entranceFee
+
+
+})
+```
+
+---> updated the msg.value(we have make a button that's gonna do that)
+
+# Problem: when we change the account in the metamask(other than local host hardhat) we get a kind of error
+
+---> because we're calling
+
+```
+(await getEntranceFee()).toString()
+```
+
+on an address that doesn't exist
+
+# It might be confusing what we're doing here
+
+# add a button to enter the raffle
+
+---> before we actually do that, let's make sure that we can only call the function as long as there is a raffle address
+
+# In LotteryEntrance.js
+
+```
+return(
+    <div>
+        Hi from Lottery Entrance!
+        {
+            raffleAddress ? (
+                <div>
+                    <button
+                        onClick = {
+                            async function() {
+                                await enterRaffle()
+                            }
+                        }
+                    >
+                    Enter Raffle
+                    </button>
+
+                    Entrance Fee: {ethers.utils.formatUnits(entranceFee,"ether")}ETH
+                </div>
+            ) :(
+                <div> No Raffle Address Detected</div>
+            )
+        }
+
+    </div>
+)
+
+```
+
+# Problem: The above thing is not useful for user who are following along with this to look at this and go, Okay, did it go through? or we did it fail? like what's just happened?
+
+# So, what we gonna do, we create notifications want a little pop up saying, hey, you sent your transaction, great job
+
+# again we're going to use some library web3uikit, u can search notification and import it in \_app.js
+
+---> we will wrap all the components in NotificationProvider
+
+```
+import {NotificationProvider} from "web3uikit"
+
+<MoralisProvider>
+<NotificationProvider> <componetnts>
+</NotificationProvider>
+</MoralisProvider>
+
+
+
+```
+
+# Back into our LotteryEntrance.js
+
+---> we are gonna import a hook
+
+```
+{useNotification} from 'web3uikit'
+```
+
+---> this useNotification gives us a thing 'dispatch'(it is something that will give pop up)
+
+```
+const dispatch = useNotification()
+
+```
+
+# Enter Raffle Button
+
+```
+<button
+        onClick = {
+            async function() {
+                await enterRaffle(
+
+                    //onComplete:
+                    //onError:
+                    onSuccess: handleSuccess,
+                    onError: (error)=>console.log(error),
+
+                )
+            }
+        }
+    >
+    Enter Raffle
+</button>
+
+```
+
+# Pro tip(lol)
+
+# REMEMBER TO ADD THIS // onError:(error)=>console.log(error) to all of your runContractFunction.
+
+# we will use isLoading and isFetching
+
+```
+<button
+        onClick = {
+            async function() {
+                await enterRaffle()
+            }
+        }
+        disabled={isLoading || isFetching}
+
+        {
+            isLoading || isFetching ? (
+                "some spinner animation"
+
+            ) : ("Enter Raffle")
+        }
+    >
+    Enter Raffle
+</button>
+
+
+```
+
+# create handleSuccess()
+
+```
+const handleSuccess = async function (tx){
+    await tx.wait(1);
+    handleNewNotification(tx);
+}
+
+const handleNewNotification = function (){
+    dispatch({
+        type:"info",
+        message: "Transaction Complete",
+        title: "Tx Notification",
+        position: "topR",
+        icon:"bell",
+    })
+}
+
+
+```
+
+# You might be confuse about this handleSuccess function()
+
+---> This handleSuccess() function is not checking that the transaction has a block confirmation, it's just checking to see that the transaction was successfully send to metamask.
+
+---> So, onSuccess(), checks to see a transaction is successfully sent to metamask and
+
+# That's why up there in that other function we do tx.wait(1);
+
+---> And that's the piece which waits for transaction to be confirmed
+
+# Let's display how many players are playing and recent winner
+
+const {runContractFunction: getEntranceFee}=useWeb3Contract({
+abi:abi,
+contractAddress: raffleAddress, //specify the networkId
+
+    functionName: "getEntranceFee",
+    params:{}
+
+})
+
+const {runContractFunction:getNumberOfPlayer} = useWeb3Contract({
+abi:abi,
+address:raffleAddress //specify chainId
+
+    functionName: "getNumberOfPlayers"
+    params:{}
+
+})
+
+const{runContractFunction:getRecentWinner}=useWeb3Contract({
+abi:abi,
+address:raffleAddress,=//specify chainId,
+functionName: "getRecentWinner",
+params:{}
+
+})
+
+# update the code of
+
+```
+useEffect(()=>{
+},[])
+```
+
+```
+useState()
+```
+
+```
+useEffect(()=>{
+    if(isWeb3Enabled){
+        //try to read the raffle entrance fee
+        async function updateUI(){
+            entranceFeeFromCall = await getEntranceFee();
+            NumPlayerFromCall = (await getNumberOfPlayers()).toString();
+            setEntranceFee(entranceFeeFromCall)
+            setNumberOfPlayers(NumberOfPlayers);
+            setRecentWinner(RecentWinner)
+        }
+        updateUI();
+    }
+},[isWeb3Enabled]);
+```
+
+# Problem : we need to refresh for getting updated number of players(it doesn't re-render), that's kindaa annoying.
+
+# Solution: guess who is gonna do that, the handleSuccess
+
+---> we will make a standalone function of updateUI removing it from useEffect and put it into the handleSuccess()
+
+```
+const handleSuccess = async function (tx){
+    await tx.wait(1);
+    handleNewNotification(tx);
+    --> updated thing
+    updateUI();
+}
+```
+
+# Now we're gonna test getting a recentWinner
+
+---> create a new script in backend in scripts folder
+
+# mockOffchain.js
+
+# 18:02
