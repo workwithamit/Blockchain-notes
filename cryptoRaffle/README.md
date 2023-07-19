@@ -1,7 +1,11 @@
 # Blockchain-notes
-
 1. create next app using cmd line
 2. folder structure of next.js (pages..)
+
+# pages are basically routes, the diffrent pages of our website.
+
+# Everything goes through \_app.js
+
 3. components
 4. install react-moralis for simplying things (like enabling web3 wallets and all)
 5. instead of using pure ethers
@@ -249,6 +253,8 @@ let's create a new component
 # but doing it like this won't rerender.
 
 ---> so here we will use react-moralis which so many hooks to do pretty much everything.
+
+# Moralis is smart enough to know about function whether it is a view function or going to be a transaction.
 
 # react-Moralis has a hook useWeb3Contract();
 
@@ -757,4 +763,189 @@ const handleSuccess = async function (tx){
 
 # mockOffchain.js
 
+---> This script is for testing for getting the recentWinner
+
 # 18:02
+
+---> once we call that mocking script, I have to refresh the browser to see the winner here
+and number of players obviously got reset to zero.
+
+# Problem: That's not ideal
+
+---> we want our UI to update automatically when some events gets fired.
+
+---> In our raffleContract, we get this event emitted.
+
+---> Instead of In our code doing this await succes in Onclick function of button.
+
+---> What we could do is we could set up a portion to listen for that event being emitted and update the front end accordingly.
+
+---> with that knowledge, we can also listen for the winner event being emitted.
+
+---> we can update our frontend instead of refreshing to get recentWinner.
+
+# Tailwind and styling
+
+## Tailwind with nextjs
+
+---> Head over to the "tailwindcss.com/docs/guides/nextjs
+
+### Tailwindcss, postcss and autoprefixer
+
+---> once we done installing them, we gonna init tailwind and make a config file
+
+---> then configure your template paths
+
+---> tailwind.config.js
+
+```
+module.exports = {
+    content: ........
+
+}
+```
+
+--> anything that is content is tailwindable
+
+### and just follow the docs and make changes to your frontend .
+
+# Install PostCss Language Support extension
+
+# 18:12
+
+# Introduction to Hosting your site
+
+---> we're gonna deploy it to some testnet that can take very long time and then we are going to deploy our website to a hosting provider
+
+# Having a decentralized frontend, that's a little bit harder
+
+# EtherScan is centralized, but we're using it alot.
+
+# Now let's learn how to deploy this frontend in decentralized way
+
+# Next.js makes a static website
+
+# Both moralis and next.js have optionality to not to have non static code
+
+# IPFS(decentralized database)
+
+---> decentralized distributed data structure that is not a blockchain but it's similar to a blockchain. There's no mining though but dates and pinning.
+
+---> You can hash the code file/folder that's actually ipfs does
+
+---> encodes the folder or massive file data into some hash
+
+---> we can hash our data in our IPFS node
+
+---> It hosts our data and have these hashes.
+
+---> Our node is connected to a network or other IPFS nodes.(massive network). It is way lighter than other blockchain.
+
+---> That's kindaa centralized, it stores the data in node.
+
+---> But other nodes are like I like this data and pin that data.(have a copy of the entire blockchain IPFS nodes get to optionally to choose what to have and what note to )
+
+# Install and work with IPFS
+
+# deploy to IPFS
+
+---> As IPFS cannot run the code or execute the code.So our code file should be static. If it does have some server stuff, it won't work.
+
+# Yarn build
+
+---> optimized production build
+
+# yarn next export
+
+---> It will fail if we have some non static file , server stuff
+
+---> this command will create a .out folder
+
+---> Upload that folder to ipfs
+
+---> Pin to our node, copy our CID and paste it in browser.
+
+# IPFS companion(some browser have routers like brave and firefox)
+
+# Easier Way(fleek.co)
+
+---> open web: permissionless and etc.
+
+---> auto deployment
+
+watch the video from {below timestamp} for deploying it on fleek
+
+# 18:25
+
+# Fleek helps you create those deals and helps you pin your data with this filecoin blockchain
+
+# You can login in Fleek using github and give authorization to particular repo and deploy it(watch the video after 18:15)
+
+# when we make any changes in our repo it will deploy the progress automatically to same url(whatever url is previously)
+
+# Fleek uses IPFS to host your site or App.
+
+# And this is kinddaa just a router for ipfs. so people without ipfs connected can also connect to this still.
+
+# 18:31
+
+# FileCoin is actually a blockchain that helps you pin your data and uses decentralized storage to do so.
+
+---> In Ipfs you have to have people pin your data, in order for it to stay distributed and decentralized.
+
+---> Filecoin is data persistent, decentralized and distributed.
+
+---> Ipfs uses content addressing while normal uses http
+
+# FileCoin v/s IPFS
+
+---> centralized storage (problems)
+
+-->being an attack vector, for data mining, getting leaked through and also creating an data resilience problem.
+
+---> Designed to be offline first for resilience.
+
+---> Not an another peer to peer network, nice thing about IPFS protocol is the standard it uses for addressing content on the network.
+
+---> CID(content Id) makes it unique.
+
+---> Persistent and permanence of data on the network.
+
+---> In Ipfs, our data need to pinned, so either it is popular or we've to pay to a pinning service.
+
+# problems with IPFS
+
+---> we're heading back to centralization. we're are creating new data silos with this solution and losing the trustlessness and resilience we are looking for.
+
+# this where comes in the filecoin
+
+---> it is designed together with crytographic proofs in order to ensure data is stored persistently, highly, reliably and verifiably.
+
+---> user can keep it for whatever time they want.
+
+# Filecoin uses storage deals
+
+---> rewards for good actors and penalities for bad actors.
+
+---> storage deals ensures that the they have generated unique copy of your data. time to time they ensure they have many copies of data.
+
+---> proof of space time
+
+---> proof of space time is stored on blockchain.
+
+---> proof of stake for storage provider.(bidding happens)
+
+---> storage deal (expires and can be renewed)
+
+---> aim of filecoin is not data permanence rather it's data timeframe, sovereignty too.
+
+---> IPFS:- content addressing(kinddaa http)
+---> Filecoin: data persistent.(blockchain)
+
+# Some more tools
+
+### NFT.Storage, web3.storage, textile powergate(for ease of developer for connecting to ipfs and all)
+
+### Estuary.tech(for storing large dataset or meaningful public data), OrbitDB(peer to peer distributed database)
+
+### Filecoin virtual machine.
